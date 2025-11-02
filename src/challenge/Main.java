@@ -1,92 +1,106 @@
-package problem6;
+package challenge;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        ArrayList<String> groceryList = new ArrayList<>();
+        LinkedList<Place> places = new LinkedList<>();
+        places.add(new Place("Sydney", 0));
+        addPlace(places, new Place("Melbourne", 877));
+        addPlace(places, new Place("Brisbane", 917));
+        addPlace(places, new Place("Adelaide", 1374));
+        addPlace(places, new Place("Alice Springs", 2771));
+        addPlace(places, new Place("Perth", 3923));
+        addPlace(places, new Place("Darwin", 3972));
 
-        int choice;
-        do {
-            choice = menu(scan);
+        try (Scanner scanner = new Scanner(System.in)) {
+            navigateItinerary(places, scanner);
+        }
+    }
 
-            switch (choice) {
-                case 1:
-                    addItem(scan, groceryList);
-                    break;
-                case 2:
-                    removeItem(scan, groceryList);
-                    break;
-                case 3:
-                    printList(groceryList);
-                    break;
-                case 0:
+    private static void navigateItinerary(LinkedList<Place> places, Scanner scanner) {
+        ListIterator<Place> iterator = places.listIterator();
+        boolean forward = true;
+        boolean running = true;
+
+        printMenu();
+
+        while (running) {
+            System.out.print("Enter your choice: ");
+            String input = scanner.nextLine().trim().toUpperCase();
+
+            switch (input) {
+                case "F" -> {
+                    if (!forward && iterator.hasNext()) iterator.next();
+                    forward = true;
+                    if (iterator.hasNext()) {
+                        System.out.println("Forward to: " + iterator.next());
+                    } else {
+                        System.out.println("End of the itinerary!");
+                        forward = false;
+                    }
+                }
+
+                case "B" -> {
+                    if (forward && iterator.hasPrevious()) iterator.previous();
+                    forward = false;
+                    if (iterator.hasPrevious()) {
+                        System.out.println("Backward to: " + iterator.previous());
+                    } else {
+                        System.out.println("Beginning of the itinerary!");
+                        forward = true;
+                    }
+                    printMenu();
+                }
+
+                case "L" -> {
+                    System.out.println("==============================");
+                    for (Place place : places) System.out.println(place);
+                    System.out.println("==============================");
+                }
+
+                case "M" -> printMenu();
+
+                case "Q" -> {
                     System.out.println("Goodbye!");
-                    break;
-                default:
-                    System.out.println("Invalid choice.");
-            }
+                    running = false;
+                }
 
-        } while (choice != 0);
-
-        scan.close();
-    }
-
-    // MENU FUNCTION
-    public static int menu(Scanner scan) {
-        System.out.println("\n===== Grocery List Menu =====");
-        System.out.println("1. Add an item");
-        System.out.println("2. Remove an item");
-        System.out.println("3. Print list of items");
-        System.out.println("0. Exit");
-        System.out.print("Enter your choice: ");
-        return scan.nextInt();
-    }
-
-    public static void addItem(Scanner scan, ArrayList<String> list) {
-        scan.nextLine(); // consume newline
-        System.out.print("Enter the item to add: ");
-        String item = scan.nextLine().trim().toLowerCase();
-
-        if (list.contains(item)) {
-            System.out.println("Item already exists in the list!");
-        } else {
-            list.add(item);
-            Collections.sort(list);
-            System.out.println("Item added successfully!");
-        }
-
-        printList(list);
-    }
-
-    public static void removeItem(Scanner scan, ArrayList<String> list) {
-        scan.nextLine(); // consume newline
-        System.out.print("Enter the item to remove: ");
-        String item = scan.nextLine().trim().toLowerCase();
-
-        if (list.remove(item)) {
-            System.out.println("Item removed successfully!");
-        } else {
-            System.out.println("Item not found in the list.");
-        }
-
-        Collections.sort(list);
-        printList(list);
-    }
-
-    public static void printList(ArrayList<String> list) {
-        System.out.println("\nCurrent Grocery List:");
-        if (list.isEmpty()) {
-            System.out.println("(empty)");
-        } else {
-            for (String i : list) {
-                System.out.println("- " + i);
+                default -> System.out.println("Invalid choice. Please try again.");
             }
         }
+    }
+
+    private static void addPlace(LinkedList<Place> places, Place newPlace) {
+        if (places.contains(newPlace)) {
+            System.out.println(newPlace.getName() + " already exists!");
+            return;
+        }
+
+        ListIterator<Place> iterator = places.listIterator();
+        while (iterator.hasNext()) {
+            Place current = iterator.next();
+            if (newPlace.getDistanceSydney() < current.getDistanceSydney()) {
+                iterator.previous();
+                iterator.add(newPlace);
+                return;
+            }
+        }
+        places.add(newPlace);
+    }
+
+    private static void printMenu() {
+        System.out.println("====================================");
+        System.out.println("Available actions (select word or letter):");
+        System.out.println("  (F)orward");
+        System.out.println("  (B)ackward");
+        System.out.println("  (L)ist Places");
+        System.out.println("  (M)enu");
+        System.out.println("  (Q)uit");
+        System.out.println("=====================================");
     }
 }
 
