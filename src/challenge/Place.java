@@ -1,4 +1,4 @@
-package test;
+package challenge;
 class Place {
     private String name;
     private int distanceSydney;
